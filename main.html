@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taylor Swift Spin Wheel</title>
+  <style>
+    body {
+        background: url('https://cache.umusic.com/_sites/_halo/zrskt/nwff/th/td-po.jpg') no-repeat center center fixed; 
+        background-size: cover;
+        
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+    }
+ 
+    .wheel-container {
+      position: relative;
+      width: 500px;
+      height: 500px;
+    }
+ 
+    .wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: conic-gradient(
+        #00a3ad,
+        #FCE1A8,
+        #632e6d,
+        #9c1b15,
+        #74A1C5,
+        #000000,
+        #eaadd6,
+        #bababa,
+        #7f3c10,
+        #1c3b56
+      );
+      position: absolute;
+      cursor: pointer;
+    }
+    .wheel::before {
+        content: '';
+        position: absolute;
+        border: 3px solid black;
+        width: 105%;
+        height: 105%;
+        left: -2.5%;
+        top: -2.5%;
+        border-radius: 50%;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .segment {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      transform-origin: 100% 100%;
+      clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    }
+
+
+    .confetti-piece {
+        position: fixed;
+        opacity: 0.7;
+        animation: fall linear infinite, sideWays ease-in-out infinite;
+        border-radius: 50%;  
+    }
+    
+    @keyframes fall {
+        to {
+            transform: translateY(100vh);
+        }
+    }
+    
+ 
+    #confetti {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+ 
+    #selected-title {
+      position: relative;
+      top: 20%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: fantasy;
+      font-size: 38px;
+      font-weight: bold;
+      color: #fff;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="wheel-container" onclick="spinWheel()">
+    <div class="wheel" id="spin-wheel">
+      <div id="confetti"></div>
+      <div class="segment" id="segment-1"></div>
+      <div class="segment" id="segment-2"></div>
+      <div class="segment" id="segment-3"></div>
+      <!-- Add more segments as needed -->
+    </div>
+    <div id="selected-title"></div>
+  </div>
+
+<audio id="spin-sound" src="wheel-fortune-1_8ous151q.mp3"></audio>
+<audio id="clap-sound" src="applause4.mp3"></audio>
+ 
+  <script src=https://cdn.jsdelivr.net/npm/animejs@3.2.1></script>
+  <script>
+    const songs = [
+    "Tim McGraw",
+    "Picture To Burn",
+    "Teardrops On My Guitar",
+    "A Place In This World",
+    "Cold As You",
+    "The Outside",
+    "Tied Together With A Smile",
+    "Stay Beautiful",
+    "Should’ve Said No",
+    "Mary’s Song (Oh My My My)",
+    "Our Song",
+    "I'm Only Me When I'm With You",
+    "Invisible",
+    "A Perfectly Good Heart",
+    "Welcome To New York",
+    "Blank Space",
+    "Style",
+    "Out Of The Woods",
+    "All You Had To Do Was Stay",
+    "Shake It Off",
+    "I Wish You Would",
+    "Bad Blood",
+    "Wildest Dreams",
+    "How You Get The Girl",
+    "This Love",
+    "I Know Places",
+    "Clean",
+    "Wonderland",
+    "You Are In Love",
+    "New Romantics",
+    "Is It Over Now?",
+    "Now That We Don't Talk",
+    "Suburban Legends",
+    "Say Don't Go",
+    "Slut!",
+    "…Ready For It?",
+    "End Game with Ed Sheeran and Future",
+    "I Did Something Bad",
+    "Don’t Blame Me",
+    "Delicate",
+    "Look What You Made Me Do",
+    "So It Goes…",
+    "Gorgeous",
+    "Getaway Car",
+    "King Of My Heart",
+    "Dancing With Our Hands Tied",
+    "Dress",
+    "This Is Why We Can’t Have Nice Things",
+    "Call It What You Want",
+    "New Year’s Day",
+    "I Forgot That You Existed",
+    "Cruel Summer",
+    "Lover",
+    "The Man",
+    "The Archer",
+    "I Think He Knows",
+    "Miss Americana & The Heartbreak Prince",
+    "Paper Rings",
+    "Cornelia Street",
+    "Death By A Thousand Cuts",
+    "London Boy",
+    "Soon You’ll Get Better with the Dixie Chicks",
+    "False God",
+    "You Need To Calm Down",
+    "Afterglow",
+    "Me! with Brendon Urie",
+    "It’s Nice To Have A Friend",
+    "Daylight",
+    "All of the girls you loved before",
+    "The 1",
+    "Cardigan",
+    "The Last Great American Dynasty",
+    "Exile with Bon Iver",
+    "My Tears Ricochet",
+    "Mirrorball",
+    "Seven",
+    "August",
+    "This Is Me Trying",
+    "Illicit Affairs",
+    "Invisible String",
+    "Mad Woman",
+    "Epiphany",
+    "Betty",
+    "Peace",
+    "Hoax",
+    "The Lakes",
+    "Willow",
+    "Champagne Problems",
+    "Gold Rush",
+    "Tis The Damn Season",
+    "Tolerate It",
+    "No Body, No Crime with Haim",
+    "Happiness",
+    "Dorothea",
+    "Coney Island- with the National",
+    "Ivy",
+    "Cowboy Like Me",
+    "Long Story Short",
+    "Marjorie",
+    "Closure",
+    "Evermore – with Bon Iver",
+    "Right Where You Left Me",
+    "It’s Time To Go",
+    "Fearless",
+    "Fifteen",
+    "Love Story",
+    "Hey Stephen",
+    "White Horse",
+    "You Belong With Me",
+    "Breathe with Colbie Caillat",
+    "Tell Me Why",
+    "You’re Not Sorry",
+    "The Way I Loved You",
+    "Forever & Always",
+    "The Best Day",
+    "Change",
+    "Jump Then Fall",
+    "Untouchable",
+    "Forever & Always – Piano Version",
+    "Come In With The Rain",
+    "Superstar",
+    "The Other Side Of The Door",
+    "Today Was A Fairytale",
+    "You All Over Me – with Maren Morris",
+    "Mr. Perfectly Fine",
+    "We Were Happy",
+    "That’s When – with Keith Urban",
+    "Don’t You",
+    "Bye Bye Baby",
+    "State Of Grace",
+    "Red",
+    "Treacherous",
+    "I Knew You Were Trouble",
+    "22",
+    "Almost Do”",
+    "We Are Never Ever Getting Back Together”",
+    "Stay Stay Stay”",
+    "The Last Time” (featuring Gary Lightbody of Snow Patrol)",
+    "Holy Ground”",
+    "Sad Beautiful Tragic”",
+    "The Lucky One”",
+    "Everything Has Changed” (featuring Ed Sheeran)",
+    "Starlight”",
+    "Begin Again”",
+    "The Moment I Knew”",
+    "Come Back… Be Here”",
+    "Girl At Home”",
+    "State Of Grace” (acoustic version)",
+    "Ronan”",
+    "Better Man”",
+    "Nothing New with Phoebe Bridgers",
+    "Babe",
+    "Message In A Bottle",
+    "I Bet You Think About Me with Chris Stapleton",
+    "Forever Winter",
+    "Run – with Ed Sheeran",
+    "The Very First Night",
+    "All Too Well – 10 Minute Version",
+    "Safe and Sound",
+    "Eyes Open",
+    "Mine (Taylor’s Version)",
+    "Sparks Fly (Taylor’s Version)",
+    "Back to December (Taylor’s Version)",
+    "Speak Now (Taylor’s Version)",
+    "Dear John (Taylor’s Version)",
+    "Mean (Taylor’s Version)",
+    "The Story of Us (Taylor’s Version)",
+    "Never Grow Up (Taylor’s Version)",
+    "Enchanted (Taylor’s Version)",
+    "Better Than Revenge (Taylor’s Version)",
+    "Innocent (Taylor’s Version)",
+    "Haunted (Taylor’s Version)",
+    "Last Kiss (Taylor’s Version)",
+    "Long Live (Taylor’s Version)",
+    "Ours (Taylor’s Version)",
+    "Superman (Taylor’s Version)",
+    "Electric Touch (Taylor’s Version) (From the Vault)",
+    "When Emma Falls in Love (Taylor’s Version) (From the Vault)",
+    "I Can See You (Taylor’s Version) (From the Vault)",
+    "Castles Crumbling (Taylor’s Version) (From the Vault)",
+    "Foolish One (Taylor’s Version) (From the Vault)",
+    "Timeless (Taylor’s Version) (From the Vault)",
+    "Lavender Haze",
+    "Maroon",
+    "Anti-Hero",
+    "You're On Your Own, Kid",
+    "Midnight Rain",
+    "Question",
+    "Vigilante Shit",
+    "Bejeweled",
+    "Labyrinth",
+    "Karma",
+    "Sweet Nothing",
+    "Mastermind",
+    "The Great War",
+    "Bigger Than The Whole Sky",
+    "Paris",
+    "High Infidelity",
+    "Glitch",
+    "Would’ve, Could’ve, Should’ve",
+    "Dear Reader",
+    "Hits Different",
+    "Snow On The Beach (feat. More Lana Del Rey)",
+    "You're Losing Me"
+    ];
+ 
+    const wheel = document.getElementById("spin-wheel");
+    const confetti = document.getElementById("confetti");
+    const selectedTitle = document.getElementById("selected-title");
+ 
+    function spinWheel() {
+      const randomDegrees = Math.floor(Math.random() * 3600) + 1800; // Spin between 5 and 10 full rotations
+      const randomSong = songs[Math.floor(Math.random() * songs.length)];
+
+      document.getElementById("spin-sound").play();
+
+      // Rotate the wheel with animation
+      anime({
+        targets: '#spin-wheel',
+        rotate: randomDegrees,
+        easing: 'easeInOutQuad',
+        duration: 5000, // 5 seconds for the spin
+        begin: function() {
+            wheel.style.animation = 'bounce 0.5s';  // Adding bounce at the start
+        },
+        complete: () => {
+          confetti.innerHTML = "&#127881;"; // Confetti emoji
+          playClappingSound();
+          displaySelectedTitle(randomSong);
+        }
+      });
+    }
+ 
+    function playClappingSound() {
+      // Implement sound playback (you can use a library like Howler.js)
+      // For simplicity, we'll just log a message to the console here
+      console.log("Clapping sound!");
+      document.getElementById("clap-sound").play();
+    }
+ 
+    function displaySelectedTitle(title) {
+        // Display the selected title prominently
+        selectedTitle.innerHTML = title;
+        selectedTitle.style.display = 'block';
+    
+    generateConfetti(2000); // Generate 100 confetti pieces
+    
+        // Animation for the selected title
+        anime({
+            targets: '#selected-title',
+            scale: [0, 1],
+            opacity: [0, 1],
+            easing: 'easeInOutQuad',
+            duration: 1000, // 1 second for the display animation
+        });
+    
+        // Reset the wheel and selected title after a delay
+        setTimeout(() => {
+            anime({
+                targets: '#spin-wheel',
+                rotate: 0,
+                easing: 'linear',
+                duration: 1000, // 1 second for the reset
+                complete: () => {
+                    clearConfetti(); // Clear all confetti
+                    selectedTitle.style.display = 'none'; // Hide selected title
+                }
+            });
+        }, 3000); // Wait for 3 seconds before resetting
+    }
+
+
+    function generateConfetti(count) {
+        const colors = [
+            '#00a3ad', '#FCE1A8', '#632e6d', '#9c1b15', 
+            '#74A1C5', '#000000', '#eaadd6', '#bababa', 
+            '#7f3c10', '#1c3b56'
+        ];
+    
+        for (let i = 0; i < count; i++) {
+            let confettiPiece = document.createElement('div');
+            confettiPiece.className = 'confetti-piece';
+            
+            confettiPiece.style.width = `${5 + Math.random() * 10}px`;
+            confettiPiece.style.height = confettiPiece.style.width;
+            
+            let startX = Math.random() * window.innerWidth;
+            let startY = -20 - Math.random() * 100;  // This ensures that they don't all start at the same height
+            
+            confettiPiece.style.top = startY + 'px';
+            confettiPiece.style.left = startX + 'px';
+            
+            confettiPiece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            let animationDuration = `${2 + Math.random() * 3}s`;
+            let sideWaysDuration = `${0.5 + Math.random()}s`;
+    
+            confettiPiece.style.animationDuration = `${animationDuration}, ${sideWaysDuration}`;
+            
+            confetti.appendChild(confettiPiece);
+        }
+    }
+    
+    
+    function getRandomColor() {
+        const colors = [
+    '#FFC3A0', // pastel orange
+    '#FFD1DC', // pastel pink
+    '#DFFFD6', // pastel green
+    '#AEEEEE', // pastel cyan
+    '#B4E1FF', // pastel blue
+    '#A4A8D4', // pastel purple
+    '#FEBABD', // soft pink
+    '#FCE8A8', // soft yellow
+    '#B6E2D3', // soft mint
+    '#B5A8D3', // lavender
+    '#D6EBFF', // powder blue
+    '#FFEEB6', // mellow yellow
+    '#FFDCE0', // blush pink
+    '#E0E4CC', // soft green
+    '#D6D6AD', // tea green
+    '#FFE2F1', // bubblegum pink
+    '#C3C8E0', // periwinkle
+    '#E7A6B4', // cherry blossom pink
+    '#CCE3DE', // pastel seafoam
+    '#EED7C5'  // pastel peach
+];
+
+        return colors[Math.floor(Math.random() * colors.length)];
+    }
+    
+    function clearConfetti() {
+        confetti.innerHTML = "";
+    }
+    
+  </script>
+</body>
+</html>
